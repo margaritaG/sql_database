@@ -97,6 +97,8 @@ class DBFieldBase
   bool write_to_database_;
   //! The name of the column that this field is stored in in the database
   std::string name_;
+  //! The formula with which to retrieve this column from the database
+  std::string formula_;
   //! The name of the table that this field is stored in the database
   std::string table_name_;
   //! Optional: the name of a database sequence that is used as a default value for this field
@@ -104,16 +106,21 @@ class DBFieldBase
 
   //! Copy constructor is protected, it should only be called by derived classes which also copy the data
  DBFieldBase(DBClass *owner, const DBFieldBase *other) : 
-  type_(other->type_), owner_(owner),
+    type_(other->type_), owner_(owner),
     write_permission_(other->write_permission_), read_from_database_(other->read_from_database_), 
     write_to_database_(other->write_to_database_), 
-    name_(other->name_), table_name_(other->table_name_) {}
+    name_(other->name_), formula_(other->formula_), table_name_(other->table_name_) {}
 
  public:
  DBFieldBase(Type type, DBClass* owner, std::string name, std::string table_name, bool write_permission) : 
     type_(type), owner_(owner),
     write_permission_(write_permission), read_from_database_(true), write_to_database_(true), 
     name_(name), table_name_(table_name) {}
+
+ DBFieldBase(Type type, DBClass* owner, std::string name, std::string formula, std::string table_name, bool write_permission) :
+    type_(type), owner_(owner),
+    write_permission_(write_permission), read_from_database_(true), write_to_database_(true),
+    name_(name), formula_(formula), table_name_(table_name) {}
 
   Type getType() const {return type_;}
 
@@ -147,6 +154,7 @@ class DBFieldBase
   }
 
   std::string getName() const {return name_;}
+  std::string getFormula() const {return formula_;}
   std::string getTableName() const {return table_name_;}
   std::string getSequenceName() const {return sequence_name_;}
 
@@ -318,6 +326,9 @@ class DBFieldData : public DBFieldBase
   DBFieldData(Type type, DBClass* owner, std::string name, std::string table_name, bool write_permission) : 
     DBFieldBase(type, owner, name, table_name, write_permission){}
 
+  DBFieldData(Type type, DBClass* owner, std::string name, std::string formula, std::string table_name, bool write_permission) :
+      DBFieldBase(type, owner, name, formula, table_name, write_permission){}
+
   const T& get() const {return data_;}
 
   T& get() {return data_;}
@@ -351,6 +362,9 @@ class DBField : public DBFieldData<T>
   DBField(DBFieldBase::Type type, DBClass *owner, std::string name, std::string table_name, bool write_permission) : 
     DBFieldData<T>(type, owner, name, table_name, write_permission) {}
 
+  DBField(DBFieldBase::Type type, DBClass *owner, std::string name, std::string formula, std::string table_name, bool write_permission) :
+      DBFieldData<T>(type, owner, name, formula, table_name, write_permission) {}
+
  DBField(DBClass *owner, const DBField<T> *other) : DBFieldData<T>(owner, other) 
  {
    this->copy(other);
@@ -365,6 +379,9 @@ class DBField<bool> : public DBFieldData<bool>
  public:
   DBField(Type type, DBClass *owner, std::string name, std::string table_name, bool write_permission) : 
     DBFieldData<bool>(type, owner, name, table_name, write_permission) {}
+
+  DBField(Type type, DBClass *owner, std::string name, std::string formula, std::string table_name, bool write_permission) :
+      DBFieldData<bool>(type, owner, name, formula, table_name, write_permission) {}
 
   DBField(DBClass *owner, const DBField<bool> *other) : DBFieldData<bool>(owner, other) 
   {
@@ -395,6 +412,9 @@ class DBField< std::vector<char> > : public DBFieldData< std::vector<char> >
  public:
   DBField(Type type, DBClass *owner, std::string name, std::string table_name, bool write_permission) : 
     DBFieldData< std::vector<char> >(type, owner, name, table_name, write_permission) {}
+
+  DBField(Type type, DBClass *owner, std::string name, std::string formula, std::string table_name, bool write_permission) :
+    DBFieldData< std::vector<char> >(type, owner, name, formula, table_name, write_permission) {}
 
  DBField(DBClass *owner, const DBField< std::vector<char> > *other) : DBFieldData< std::vector<char> >(owner, other) 
       {
@@ -428,6 +448,10 @@ class DBField<std::string> : public DBFieldData<std::string>
   DBField(Type type, DBClass *owner, std::string name, std::string table_name, bool write_permission) : 
     DBFieldData<std::string>(type, owner, name, table_name, write_permission) {}
 
+  DBField(Type type, DBClass *owner, std::string name, std::string formula,  std::string table_name, bool write_permission) :
+    DBFieldData<std::string>(type, owner, name, formula, table_name, write_permission) {}
+
+
   DBField(DBClass *owner, const DBField< std::string > *other) : DBFieldData< std::string >(owner, other) 
       {
 	this->copy(other);
@@ -445,7 +469,10 @@ class DBField< std::vector<std::string> > : public DBFieldData< std::vector<std:
   DBField(Type type, DBClass *owner, std::string name, std::string table_name, bool write_permission) : 
     DBFieldData< std::vector<std::string> >(type, owner, name, table_name, write_permission) {}
 
- DBField(DBClass *owner, const DBField< std::vector<std::string> > *other) : 
+  DBField(Type type, DBClass *owner, std::string name, std::string formula, std::string table_name, bool write_permission) :
+    DBFieldData< std::vector<std::string> >(type, owner, name, formula, table_name, write_permission) {}
+
+  DBField(DBClass *owner, const DBField< std::vector<std::string> > *other) :
     DBFieldData< std::vector<std::string> >(owner, other) 
       {
 	this->copy(other);

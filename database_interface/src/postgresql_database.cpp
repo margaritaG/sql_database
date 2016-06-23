@@ -242,7 +242,11 @@ bool PostgresqlDatabase::getListRawResult(const DBClass *example,
       continue;
     }
 
-    select_query += ", " + example->getField(i)->getName();
+    if (!example->getField(i)->getFormula().empty()) {
+      select_query += ", " + example->getField(i)->getFormula();
+    } else {
+      select_query += ", " + example->getField(i)->getName();
+    }
     fields.push_back(example->getField(i));
     if ( example->getField(i)->getTableName() != example->getPrimaryKeyField()->getTableName() )
     {
