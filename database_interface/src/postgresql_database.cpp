@@ -670,7 +670,8 @@ bool PostgresqlDatabase::insertIntoTable(std::string table_name,
   or have a default value associated with a sequence. In the latter case, the value is retrieved
   after insertion, and set to the primary key field of the instance.
  */
-bool PostgresqlDatabase::insertIntoDatabase(DBClass* instance)
+bool PostgresqlDatabase::insertIntoDatabase(DBClass* instance,
+                                            bool commit_transcation)
 {
   //primary key must be text; its table is first
   DBFieldBase* pk_field = instance->getPrimaryKeyField();
@@ -788,8 +789,13 @@ bool PostgresqlDatabase::insertIntoDatabase(DBClass* instance)
     }
   }
 
-  //COMMIT transaction
-  if (!commit()) return false;
+  if (commit_transcation) {
+    //COMMIT transaction
+    if (!commit()) return false;
+  } else {
+    rollback();
+    return false;
+  }
 
   return true;
 }

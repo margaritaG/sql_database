@@ -204,7 +204,7 @@ class PostgresqlDatabase
   bool loadFromDatabase(DBFieldBase* field) const;
 
   //! Inserts a new instance of a DBClass into the database
-  bool insertIntoDatabase(DBClass* instance);
+  bool insertIntoDatabase(DBClass* instance, bool commit_transcation=true);
 
   //! Deletes an instance of a DBClass from the database
   bool deleteFromDatabase(DBClass* instance);
