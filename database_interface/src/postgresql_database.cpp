@@ -225,8 +225,8 @@ bool PostgresqlDatabase::getListRawResult(const DBClass *example,
   }
 
   std::string select_query;
-  select_query += "SELECT " + example->getPrimaryKeyField()->getName() + " ";  
-  fields.push_back(example->getPrimaryKeyField());
+
+  select_query += "SELECT ";
 
   //we will store here the list of tables we will join on
   std::vector<std::string> join_tables;
@@ -242,10 +242,13 @@ bool PostgresqlDatabase::getListRawResult(const DBClass *example,
       continue;
     }
 
+    if (i != 0) {
+      select_query += ", ";
+    }
     if (!example->getField(i)->getFormula().empty()) {
-      select_query += ", " + example->getField(i)->getFormula();
+      select_query += example->getField(i)->getFormula();
     } else {
-      select_query += ", " + example->getField(i)->getName();
+      select_query += example->getField(i)->getName();
     }
     fields.push_back(example->getField(i));
     if ( example->getField(i)->getTableName() != example->getPrimaryKeyField()->getTableName() )
